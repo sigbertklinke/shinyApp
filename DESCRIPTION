@@ -1,0 +1,25 @@
+Package: shinyApp
+Type: Package
+Title: Create simple interactive programs as Shiny apps
+Version: 0.2.0
+Author: Sigbert Klinke
+Maintainer: Sigbert Klinke <sigbert@hu-berlin.de>
+Description: Shiny apps to make simple interactive programs.
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+  magrittr,
+  shiny,
+  shinyExample
+Imports: 
+  rio,
+  digest,
+  shinydashboard, 
+  shinyWidgets, 
+  shinyFiles
+Suggests: 
+  knitr, 
+  rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1

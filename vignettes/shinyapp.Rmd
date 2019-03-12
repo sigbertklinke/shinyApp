@@ -1,0 +1,293 @@
+---
+title: "shinyApp"
+author: 
+- name: "Sigbert Klinke" 
+  email: sigbert@hu-berlin.de
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{ShinyApp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`shinyApp` will support you in creating interactive from your **existing** programs with [Shiny](shiny.rstudio.com), e.g. for teaching. 
+
+As teachers for statistics courses we have written numerous programs that we either show to our students or use to produce graphics, tables for teaching material. For example, we have created a set of graphics which visualize the Bravias-Pearson correlation coefficient.
+
+```{r, echo=FALSE, fig.width=5, fig.height=5}
+par(mfrow=c(2,2), mar=c(2.1,2.1,2.1,2.1))
+X<- c(0.2,0.2,0.5,0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 2, 2, 2.3, 2.8,2.8,3, 3, 3.5, 3, 3, 3.8,4,4,4,4,5,5,5,5,5,6.1,6.5,6.5,7.5,10,11,11,11.5,16,17)
+Y <- c(0.2,0.2,0.5,0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 2, 2, 2.3, 2.8,2.8,3, 3, 3.5, 3, 3, 3.8,4,4,4,4,5,5,5,5,5,6.1,6.5,6.5,7.5,10,11,11,11.5,16,17 )
+plot(X,Y, pch=16, main="r = +1", axes=FALSE)
+box()
+X <- c(0.2,0.2,0.5,0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 2, 2, 2.3, 2.8,2.8,3, 3, 3.5, 3, 3, 3.8,4,4,4,4,5,5,5,5,5,6.1,6.5,6.5,7.5,10,11,11,11.5,16,17)
+Y <- -c(0.2,0.2,0.5,0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 2, 2, 2.3, 2.8,2.8,3, 3, 3.5, 3, 3, 3.8,4,4,4,4,5,5,5,5,5,6.1,6.5,6.5,7.5,10,11,11,11.5,16,17 )
+plot(X,Y, pch=16, main="r = -1", axes=FALSE)
+box()
+X <- c(0.2,0.2,0.5,0.5, 0.5, 0.5, 2, 1, 1, 1, 1, 1, 5, 1, 2, 2, 2.3, 7,2.8,2.8,3, 3, 3.5, 3, 3, 3.8,4,4,4,4,5,5,5,5,5,6.1,6.5,6.5,7.5,10,11,11,11.5,16,17,9,11,12)
+Y <- c(0.2,0.2,0.5,0.5, 4, 0.5, 0.5, 1, 1, 1, 5, 1, 1,8, 2, 2, 9,7, 2.8,2.8,3, 3, 8, 3, 3, 6.8,4,4,4,4,5,5,5,5,5,6.4,6.5,6.5,2,10,11,11,13.5,16,11,7,6,8 )
+plot(X,Y, pch=16, main="r = +0.8", axes=FALSE)
+box()
+X <- c(0.2,0.2,0.5,0.5, 0.5, 0.5, 2, 1, 1, 1, 1, 1, 5, 1, 2, 2, 2.3, 7,2.8,2.8,3, 3, 3.5, 3, 3, 3.8,4,4,4,4,5,5,5,5,5,6.1,6.5,6.5,7.5,10,11,11,11.5,16,17,9,11,12)
+Y <- -c(0.2,0.2,0.5,0.5, 4, 0.5, 0.5, 1, 1, 1, 5, 1, 1,8, 2, 2, 9,7, 2.8,2.8,3, 3, 8, 3, 3, 6.8,4,4,4,4,5,5,5,5,5,6.4,6.5,6.5,2,10,11,11,13.5,16,11,7,6,8 )
+plot(X,Y, pch=16, main="r = -0.8", axes=FALSE)
+box()
+```
+
+Of course this screams for a replacement with an [interactive app](https://shinyapps.wiwi.hu-berlin.de/app/correlation)!
+
+The `shinyApp` package tries to stay as near as possible to the `shiny`package. Because it may happen that you need some complex interaction which can not be realized with `shinyApp`. Then you will have no other choice then learning `shiny`.
+
+
+## General structure
+
+It is assumed that you that you have one (or several) programs which generate an output, either as text or as graphic.
+
+You should create another R program which describes your user interface:
+
+```{r eval=FALSE}
+ShinyApp() %>%
+  PlotOutput('id', file='yourprogram.R') %>%
+  WriteApp()
+```
+
+Running this program in R will create (and edit) a file `app.R` in the current directory which contains your Shiny app and it can run immediately (assumed your program is error free).
+
+The table shows the supported in- and output elements. The elements are build exactly as in Shiny
+
+```{r eval=FALSE}
+element(inputId, element-parameters, additional-parameters)
+```
+
+Element                |  Shiny element   | Aim             | Related commands
+-----------------------|------------------|-----------------|----------------
+`PlotOutput`           | `plotOutput`     | Show a plot     |
+`TextOutput`           | `textOutput`     | Show a text     |
+`CheckboxInput`        | `checkboxInput`  | Show a checkbox | 
+`SelectInput`          | `selectInput`    | Choose between specified alternatives | 
+`DataInput`            |                  | Choose a data set    | `getDataSelection`
+`LanguageInput`        |                  | Choose a language    | `getText`
+`VariableInput`        |                  | Choose a variable    | `getDataSelection`
+`SliderInput`          | `sliderInput`    | Choose from a range  | 
+`AssociationInput`     |                  | Choose an association (\(0\leq c\leq 1\))|
+`ConfidenceLevelInput` |                  | Choose \(1-\alpha\) level |
+`CorrelationInput`     |                  | Choose a correlation (\(-1\leq r\leq 1\))|
+`SampleSizeInput`      |                  | Choose a sample size (\(30\leq n\leq 500\))|
+
+## The Shiny example
+
+The [default shiny example](https://shinyapps.wiwi.hu-berlin.de/) is a histogram where you can modify the number of bins. This example will be used to explain how `shinyApp` can support you to develop your own Shiny apps.
+
+### A basic app - no interaction
+
+Your basic code shows for one variable of the Boston Housing data (`medv`) the histogram:
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist0.R')}
+```
+
+At first we have to create a simple Shiny app which has just one output, the plot:
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist0_app.R')}
+```
+
+Executing `hist0_app.R` creates a program called `app.R` which can be immediately run.
+
+### Select the bin number - SliderInput & value
+
+The next step is to add a slider for choosing the bin number by adding a `SliderInput` with a name `breaks`:
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist1_app.R')}
+```
+
+We need to receive the current value of the input by `input$breaks`. The function `value` ensures that we always get a valid value.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist1.R')}
+```
+
+If you do not use `value` then it will happen that you get `NULL` for `input$breaks`.
+
+### Macthing the bin number of input and output
+
+If `hist` receives for the `breaks` parameter a single parameter, it will be interpreted as a *suggested* number of bins. The used number of bins is calculated by R. To achieve the correct number of bins we need to calculate the class border ourself.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist2_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist2.R')}
+```
+
+### Add the observations - CheckboxInput
+
+In the Shiny examples we have also a checkbox to add the observations to histogram as rug.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist3_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist3.R')}
+```
+
+### Adding one dataset - DataInput & getDataSelection
+
+An interactive app may need the possibility to use data sets, therefore we add one data set with `DataInput`, the Boston Housing data. 
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist4_app.R')}
+```
+
+The data are stored internally and we access a specific data set and variable by `getDataSelection`. Note that `DataInput` can be used only **once** in your program.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist4.R')}
+```
+
+Alternatively, you can load the data set with the `Global` command and access is directly in your program.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist5_app.R')}
+```
+
+The data are stored internally and we access a specific data set and variable by `getDataSelection`.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist5.R')}
+```
+
+### Choosing one variable of the data set - VariableInput & getDataSelection
+
+Of course, we want to show the histogram for all appropriate variables. Using `VariableInput` with the parameter `is=is.numeric`
+gives an input field where we can choose between all variables which full 
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist6_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist6.R')}
+```
+
+### Using several data sets and choose an appropriate variable 
+
+Finally we want to make histograms for two data sets. In the `DataInput` we must specify our data set, here `BOSTON` and `MTCARS`. 
+Since we specify more than one data set a selection element for data sets will appear, too.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist7_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogram/hist7.R')}
+```
+
+### Internationalise your app - LanguageInput & getText
+
+Students like apps, but they even like them more when they are in there native tongue. You may noticed the output in the R console when closing the app whenh running locally (not in a browser)
+
+```
+gettext(""); // 0
+ gettext("crim"); // 4
+ gettext("Number of bins"); // 1
+ gettext("Show observations"); // 1
+ gettext("BOSTON"); // 0
+ gettext("MTCARS"); // 0
+ ...
+```
+
+Internally the app keeps track of all `getText` calls and creates a list of C-style [`gettext`](https://www.gnu.org/software/gettext/) calls and their frequencies (after `//`). This can be used to create PO files for different languages.
+
+For example for german (`GERMAN.po`):
+
+```
+msgid "crim"
+msgstr "Pro-Kopf Kriminalitätsrate"
+
+msgid "Number of bins"
+msgstr "Anzahl der Klassen"
+
+msgid "Show observations"
+msgstr "Zeige Beobachtungen"
+
+msgid "BOSTON"
+msgstr "Bostoner Häuser"
+
+msgid "MTCARS"
+msgstr "Motor Trend"
+
+...
+```
+
+Or for english (`ENGLISH.po`):
+```
+msgid "crim"
+msgstr "Per capita crime rate"
+
+msgid "Number of bins"
+msgstr "Number of bins"
+
+msgid "Show observations"
+msgstr "Show observations"
+
+msgid "BOSTON"
+msgstr "Boston Housing"
+
+msgid "MTCARS"
+msgstr "Motor Trend Cars"
+
+...
+```
+
+Whenever a specific language is selected then `getText` replaces the given text by the text in PO file. If the text is not found then the original text is delivered. **Note for experts:** although it looks like that GNU gettext is used this is not the case; therefore only the simplest features are supported! 
+
+First we have to load the PO files with a `LanguageInput` element.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogramlang/hist8_app.R')}
+```
+
+And in our program we must encapsulated all texts in  `getText` calls.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogramlang/hist8.R')}
+```
+
+## Some included apps
+
+All the apps are part of the package `shinyApp` and can be found under `shinyApp/inst/app`.
+
+### Correlation
+
+The introductory examples shows a bivariate (normal) data set which has the given number of observations and correlation.
+
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/correlation/corr_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/correlation/corr.R') }
+```
+
+### DBScan
+
+[DBScan](https://en.wikipedia.org/wiki/DBSCAN) is a clustering algorithm which defines a cluster core by a number of observations which near to each other. This requires to define a *Core distance* and *Minimal neighbour*. The app visualizes with two variables of the Swiss banknote data (Upper: Top margin width, Diagonal: Length of diagonal) the influence of the two parameters.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/dbscan/dbscan_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/dbscan/dbscan.R') }
+```
+
+If you want to avoid loading the libraries and the data each time the plot is drawn then you can use the `Global` command.
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/dbscan/dbscan2_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/dbscan/dbscan2.R') }
+```
+
+### Scagnostics
+
+[Scagnostics](https://research.tableau.com/sites/default/files/Wilkinson_Infovis-05.pdf) is a set of coefficients which summarise potentially interesting patterns in 2d scatterplots. This interactive example uses the Boston Housing data set to compute the all scagnostics coefficients for all possible scatterplots, order them by size and allows look at all these scatterplots. 
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/scagnostics/scagnostics_app.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/scagnostics/scagnostics.R') }
+```
