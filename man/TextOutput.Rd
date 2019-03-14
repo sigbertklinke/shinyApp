@@ -5,7 +5,7 @@
 \title{TextOutput}
 \usage{
 TextOutput(app, outputId, container = if (inline) span else div,
-  inline = FALSE, file = NULL, text = NULL)
+  inline = FALSE, file, text, expr)
 }
 \arguments{
 \item{app}{a ShinyApp object}
@@ -20,6 +20,8 @@ for the output}
 \item{file}{character: name of file with R code to execute}
 
 \item{text}{character: text with R code to execute}
+
+\item{expr}{expression: R code to execute}
 }
 \value{
 an updated ShinyApp object

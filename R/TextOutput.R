@@ -7,25 +7,26 @@
 #' @inheritParams shiny::textOutput
 #' @param file character: name of file with R code to execute
 #' @param text character: text with R code to execute
+#' @param expr expression: R code to execute
 #'
 #' @return an updated ShinyApp object
 #' @export
 #'
 #' @examples
 #' \dontrun{ShinyApp() %>% TextOutput('plot', text='"Hello, World!"' }
-TextOutput<- function(app, outputId, container = if (inline) span else div, inline = FALSE, file=NULL, text=NULL) {
+TextOutput<- function(app, outputId, container = if (inline) span else div, inline = FALSE, file, text, expr) {
   div <- function(...) { shiny::div(...) }
   span <- function(...) { shiny::span(...) }
   # browser()
   # error handling
   if (missing(outputId)) stop('"outputId" missing')
-  if (is.null(text)) {
-    if (is.null(file)) stop('Either "text" or "file" must be set')
+  pfile <- ''
+  if (!missing(file)) {
     pfile <- normalizePath(file, mustWork = TRUE)
     text  <- readLines(pfile)
-  } else {
-    pfile <- ''
   }
+  if (!missing(expr)) text <- deparse(substitute(expr))
+  text <- paste0(text, collapse="\n")
   #
   args  <- as.list(match.call())
   fargs <- formals(shiny::textOutput)

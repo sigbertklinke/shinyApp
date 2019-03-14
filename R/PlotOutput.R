@@ -7,6 +7,7 @@
 #' @inheritParams shiny::plotOutput
 #' @param file character: name of file with R code to execute
 #' @param text character: text with R code to execute
+#' @param expr expression: R code to execute
 #'
 #' @return an updated ShinyApp object
 #' @export
@@ -17,17 +18,18 @@ PlotOutput <- function(app, outputId, width = "100%", height = "400px", click = 
                        dblclick = NULL, hover = NULL, hoverDelay = NULL,
                        hoverDelayType = NULL, brush = NULL, clickId = NULL, hoverId = NULL,
                        inline = FALSE,
-                       file=NULL, text=NULL) {
+                       file, text, expr) {
   if (!inherits(app, 'ShinyApp')) stop("No shiny app")
   # error handling
   if (missing(outputId)) stop('"outputId" missing')
-  if (is.null(text)) {
-    if (is.null(file)) stop('Either "text" or "file" must be set')
+  if (missing(file)+missing(text)+missing(expr)!=2) stop ("One of 'file', 'text' or 'expr' must be given")
+  pfile <- ''
+  if (!missing(file)) {
     pfile <- normalizePath(file, mustWork = TRUE)
-    text  <- paste0(readLines(pfile), collapse="\n")
-  } else {
-    pfile <- ''
+    text  <- readLines(pfile)
   }
+  if (!missing(expr)) text <- deparse(substitute(expr))
+  text <- paste0(text, collapse="\n")
   #
   args  <- as.list(match.call())
 #  add_ID(outputId, 'plotOutput')

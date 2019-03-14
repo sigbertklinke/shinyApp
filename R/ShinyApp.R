@@ -24,6 +24,7 @@ ShinyApp.default <- function(app, ...) {
               input=list(),
               DashboardHeader=list(),
               DashboardSidebar=list(),
+              DashboardBody=list(),
               template=app) 
   class(prg) <- 'ShinyApp'
   prg %>% DashboardHeader('MM*Stat') %>% DashboardSidebar()

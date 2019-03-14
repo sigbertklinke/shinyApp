@@ -150,4 +150,10 @@ msgstr "Deutsch"
 #: gettext.c:31
 msgid "Choose language"
 msgstr "Wähle Sprache"
+#: gettext.c:31
+msgid "Histogram"
+msgstr "Histogramm"
+#: gettext.c:31
+msgid "Boxplot"
+msgstr "Boxplot"
 

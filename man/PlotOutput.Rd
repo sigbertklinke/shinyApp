@@ -7,7 +7,7 @@
 PlotOutput(app, outputId, width = "100\%", height = "400px",
   click = NULL, dblclick = NULL, hover = NULL, hoverDelay = NULL,
   hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE, file = NULL, text = NULL)
+  hoverId = NULL, inline = FALSE, file, text, expr)
 }
 \arguments{
 \item{app}{a ShinyApp object}
@@ -84,6 +84,8 @@ for the output}
 \item{file}{character: name of file with R code to execute}
 
 \item{text}{character: text with R code to execute}
+
+\item{expr}{expression: R code to execute}
 }
 \value{
 an updated ShinyApp object

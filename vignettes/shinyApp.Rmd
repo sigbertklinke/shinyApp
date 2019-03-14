@@ -249,6 +249,21 @@ And in our program we must encapsulated all texts in  `getText` calls.
 ```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogramlang/hist8.R')}
 ```
 
+### Several outputs
+
+Sometimes you want to have more than one output; for our example we want to have a a histogram and a boxplot. Thus we need two output programs
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogramlang/hist9.R')}
+```
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogramlang/box9.R')}
+```
+
+and have to integrate it to the user interface
+
+```{r, eval=FALSE, echo=TRUE, code=readLines('../inst/app/histogramlang/hist9_app.R')}
+```
+
 ## Some included apps
 
 All the apps are part of the package `shinyApp` and can be found under `shinyApp/inst/app`.

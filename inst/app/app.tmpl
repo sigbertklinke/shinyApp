@@ -12,19 +12,9 @@ library(shinyExample)
 {{Variable}}
 
 ui <- dashboardPage(
-  dashboardHeader(title="{{dashboardHeader$title}}", titleWidth={{dashboardHeader$titleWidth}}, disable={{dashboardHeader$disable}}),
-  dashboardSidebar(collapsed={{dashboardSidebar$collapsed}}, width={{dashboardSidebar$width}}, disable={{dashboardSidebar$disable}},
-    {{Sidebar}}
-    shiny::tags$div(align="center",
-      shiny::tags$hr(),
-      shiny::tags$a(href = 'https://github.com/sigbertklinke/shinyExample', 'Created with shinyExample'),
-      shiny::tags$br(),
-      shiny::tags$a(target="_blank", href="https://www.wihoforschung.de/de/flipps-1327.php",  'Supported by BMBF')
-    )
-  ),
-  dashboardBody(
-    {{Body}}
-  )
+  {{DashboardHeader}},
+  {{DashboardSidebar}},
+  {{DashboardBody}}
 )
 
 server <- function(input, output, session) {

@@ -10,7 +10,8 @@
 #' \dontrun{ShinyApp %>% DashboardHeader('MM*Stat')}
 DashboardHeader <- function(app, title = NULL, titleWidth = NULL, disable = FALSE) {
   if (!inherits(app, 'ShinyApp')) stop("No shiny app")
-  app$DashboardHeader <- list(title=title, titleWidth=titleWidth, disable=disable)
+  app$DashboardHeader <- str_call('dashboardHeader', 
+                                  list(title=title, titleWidth=titleWidth, disable=disable))
   app
 }
 

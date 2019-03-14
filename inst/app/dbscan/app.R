@@ -1,250 +1,137 @@
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
-
-readData <- function (file, ...) 
-{
-    vartype <- list(...)
-    nvartype <- length(vartype)
-    data <- readRDS(file)
-    tdata <- names(data)
-    ndata <- length(data)
-    selectable <- list()
-    for (i in 1:ndata) {
-        selectable[[i]] <- matrix(FALSE, nrow = length(data[[i]]), 
-            ncol = nvartype)
-        for (j in 1:nvartype) selectable[[i]][, j] <- sapply(data[[i]], 
-            vartype[[j]])
-        if (any(colSums(selectable[[i]]) == 0)) 
-            stop(sprintf("Data set \"%s\" has no valid selection", 
-                tdata[i]))
-        attr(data[[i]], "varnames") <- names(data[[i]])
-        colnames(selectable[[i]]) <- names(vartype)
-        attr(data[[i]], "selectable") <- selectable[[i]]
-    }
-    data
-}
-translations <- function (path = ".") 
-{
-    po <- new.env()
-    po$local <- (Sys.getenv("SHINY_PORT") == "")
-    po$files <- list.files(path = path, pattern = "*.po$", full.names = TRUE)
-    po$msgs <- list()
-    po$stats <- list(count = numeric())
-    po$sel <- 0
-    if (length(po$files)) {
-        for (i in seq(po$files)) {
-            pon <- sapply(strsplit(po$files[i], ".", fixed = T), 
-                function(elem) {
-                  elem[1]
-                })
-            msg <- paste(readLines(paste(path, po$files[i], sep = "/")), 
-                collapse = " ")
-            msgid <- regmatches(msg, gregexpr("msgid\\s*\".*?\"", 
-                msg))
-            tmp <- strsplit(msgid[[1]], "\"")
-            msgid <- sapply(tmp, function(vec) {
-                paste0(vec[2:length(vec)])
-            })
-            msgstr <- regmatches(msg, gregexpr("msgstr\\s*\".*?\"", 
-                msg))
-            tmp <- strsplit(msgstr[[1]], "\"")
-            msgstr <- sapply(tmp, function(vec) {
-                paste0(vec[2:length(vec)])
-            })
-            po$msgs[[pon]] <- list(id = msgid, str = msgstr)
-            po$stats$count[msgid] <- 0
-            po$stats[[pon]] <- msgid
-        }
-        po$sel <- 1
-    }
-    return(po)
-}
-getText <- function (msg) 
-{
-    if (mmstat$msg$local) {
-        mmstat$msg$stats$count[msg] <- mmstat$msg$stats$count[msg] + 
-            1
-        mmstat$msg$stats$count[msg][is.na(mmstat$msg$stats$count[msg])] <- 1
-    }
-    if (mmstat$msg$sel == 0) 
-        return(msg)
-    ret <- msg
-    pos <- match(msg, mmstat$msg$msgs[[mmstat$msg$sel]]$id)
-    ind <- (1:length(pos))[!is.na(pos)]
-    ret[ind] <- mmstat$msg$msgs[[mmstat$msg$sel]]$str[pos[ind]]
-    return(ret)
-}
-as.choices <- function (txt, inc = NULL) 
-{
-    if (is.null(inc)) 
-        inc <- rep(TRUE, length(txt))
-    ret <- as.list((1:length(txt))[inc])
-    names(ret) <- txt[inc]
-    ret
-}
-getDataSelection <- function (dindex, ..., simplify = TRUE) 
-{
-    sel <- getSelection(attr(mmstat$data[[dindex]], "selectable"), 
-        as.list(...))
-    nsel <- ncol(sel)
-    ret <- list()
-    for (i in 1:nsel) ret[[i]] <- as.data.frame(mmstat$data[[dindex]][, 
-        which(sel[, i] == 2)])
-    if (simplify) {
-        if (nsel > 1) {
-            retdf <- ret[[1]]
-            for (i in 2:nsel) retdf <- cbind(retdf, ret[[i]])
-            ret <- retdf
-        }
-        else {
-            ret <- ret[[1]][, 1]
-        }
-    }
-    attr(ret, "selectable") <- attr(mmstat$data[[dindex]], "selectable")
-    ret
-}
-getSelection <- function (selectable, input, duplicates.ok = FALSE) 
-{
-    nvar <- nrow(selectable)
-    ninp <- ncol(selectable)
-    if (length(input) != ninp) 
-        stop("input length does not fit")
-    newsel <- selectable
-    for (i in 1:ninp) {
-        for (j in 1:length(input[[i]])) {
-            if (newsel[input[[i]][j], i] == 1) 
-                newsel[input[[i]][j], i] <- 2
-        }
-    }
-    if (!duplicates.ok) {
-        for (i in 1:nvar) {
-            pos <- which(newsel[i, ] == 2)
-            if (length(pos) > 1) 
-                newsel[i, pos[-1]] <- 0
-            if (length(pos)) {
-                newsel[i, ] <- 0
-                newsel[i, pos[1]] <- 2
-            }
-        }
-    }
-    for (i in 1:ninp) {
-        pos <- which(newsel[, i] == 2)
-        if (length(pos) == 0) {
-            pos1 <- which(newsel[, i] == 1)
-            newsel[pos1[1], i] <- 2
-        }
-    }
-    newsel
-}
-
-mmstat     <- new.env()
-mmstat$msg <- translations()
-if (file.exists('mmstat.RDS')) mmstat$data <- readRDS('mmstat.RDS')
+library(shinyExample)
 
 {
-    library("dbscan")
-    library("rio")
-    x <- scale(import("BANK2.sav"))
+  library("dbscan")
+  library("rio")
+  x <- scale(import("https://shinyapps.wiwi.hu-berlin.de/d/BANK2.sav"))
 }
+
+
+
+
+
+
 
 ui <- dashboardPage(
-  dashboardHeader(title="MM*Stat", titleWidth=, disable=FALSE),
-  dashboardSidebar(collapsed=FALSE, width=, disable=FALSE,
-    uiOutput("outputId"="UIeps"),
-uiOutput("outputId"="UIpts"),
-    shiny::tags$div(align="center",
-      shiny::tags$hr(),
-      shiny::tags$a(href = 'https://github.com/sigbertklinke/shinyExample, 'Created with shinyExample'),
-      shiny::tags$br(),
-      shiny::tags$a(target="_blank", href="https://www.wihoforschung.de/de/flipps-1327.php",  'Supported by BMBF')
-    )
+  dashboardHeader(title="", titleWidth=, disable=),
+  dashboardSidebar(collapsed=, width=, disable=,
+                   uiOutput("outputId"="UIeps"),
+                   uiOutput("outputId"="UIpts"),
+                   shiny::tags$div(align="center",
+                                   shiny::tags$hr(),
+                                   shiny::tags$a(href = 'https://github.com/sigbertklinke/shinyExample', 'Created with shinyExample'),
+                                   shiny::tags$br(),
+                                   shiny::tags$a(target="_blank", href="https://www.wihoforschung.de/de/flipps-1327.php",  'Supported by BMBF')
+                   )
   ),
   dashboardBody(
     shiny::plotOutput("outputId"="plot",
-"width"="100%",
-"height"="400px",
-"inline"=FALSE)
+                      "width"="100%",
+                      "height"="400px",
+                      "inline"=FALSE)
   )
 )
 
 server <- function(input, output, session) {
   seed <- list(inBookmark=FALSE)
-
+  
   onBookmark(function(state) {
     state$seed <- seed
   })
-
+  
   onRestore(function(state) {
     seed <- state$seed
     seed$inBookmark <- TRUE
   })
-
+  
   onRestored(function(state) {
     seed$inBookmark <- FALSE
   })
-
+  
   onStop(function() {
-	  if (mmstat$msg$local) cat(sprintf('gettext("%s"); // %.0f\n', 
-	                                    names(mmstat$msg$stats$count),
-	                                    mmstat$msg$stats$count))
+    if (isLocal()) {
+      count <- getMMstat('lang', 'stats', 'count')
+      cat(sprintf('gettext("%s"); // %.0f\n', names(count), count))
+    }
   })
-
+  
   value <- function(val) {
     param <- substitute(val)
-    if(param=="input$eps") { if(is.null(val)||(val< 0)||(val> 1)) return(0.5) else return(val) }
-if(param=="input$pts") { if(is.null(val)||(val< 2)||(val> 10)) return(5) else return(val) }
+    if(param=="input$eps") { v<-toNum(val, min=0, max=1); if(is.na(v)) return(0.5) else return(v) }
+    if(param=="input$pts") { v<-toNum(val, min=2, max=10); if(is.na(v)) return(5) else return(v) }
     return(val)
   }
-
+  
+  observe({
+    
+    sel  <- value(isolate(input$eps))
+    shiny::updateSliderInput("session"=session,
+                             "inputId"="eps",
+                             "label"=getText("Core distance"),
+                             "value"=sel,
+                             "min"=0,
+                             "max"=1,
+                             "step"=0.01)
+  })
+  observe({
+    
+    sel  <- value(isolate(input$pts))
+    shiny::updateSliderInput("session"=session,
+                             "inputId"="pts",
+                             "label"=getText("Minimal neighbour "),
+                             "value"=sel,
+                             "min"=2,
+                             "max"=10,
+                             "step"=1)
+  })
+  
   output$plot <- shiny::renderPlot({
-#/home/sigbert/syncthing/projekte/R/shinyExample/inst/examples/app/dbscan/dbscan2.R
-db  <- dbscan(x[,c(4,6)], value(input$eps), value(input$pts))
-col <- c('grey', rainbow(max(db$cluster)))
-plot(x[,c(4,6)], col=col[1+db$cluster], pch=19, asp=TRUE)
-})
-output$UIeps<- renderUI({
-#RENDERUI
-shiny::sliderInput("inputId"="eps",
-"label"=getText("Core distance"),
-"min"=0,
-"max"=1,
-"value"=0.5,
-"step"=0.01,
-"round"=FALSE,
-"format"=NULL,
-"locale"=NULL,
-"ticks"=TRUE,
-"animate"=FALSE,
-"width"=NULL,
-"sep"=",",
-"pre"=NULL,
-"post"=NULL,
-"timeFormat"=NULL,
-"timezone"=NULL,
-"dragRange"=TRUE)
-})
-output$UIpts<- renderUI({
-#RENDERUI
-shiny::sliderInput("inputId"="pts",
-"label"=getText("Minimal neighbour "),
-"min"=2,
-"max"=10,
-"value"=5,
-"step"=1,
-"round"=FALSE,
-"format"=NULL,
-"locale"=NULL,
-"ticks"=TRUE,
-"animate"=FALSE,
-"width"=NULL,
-"sep"=",",
-"pre"=NULL,
-"post"=NULL,
-"timeFormat"=NULL,
-"timezone"=NULL,
-"dragRange"=TRUE)
-})
+    
+    #/home/sigbert/syncthing/projekte/R/shinyApp/inst/app/dbscan/dbscan2.R
+    # shinyApp/inst/app/dbscan/dbscan2.R
+    db  <- dbscan(x[,c(4,6)], value(input$eps), value(input$pts))
+    col <- c('grey', rainbow(max(db$cluster)))
+    plot(x[,c(4,6)], col=col[1+db$cluster], pch=19, asp=TRUE)
+  })
+  output$UIeps<- renderUI({
+    shiny::sliderInput("inputId"="eps",
+                       "label"=getText("Core distance"),
+                       "min"=0,
+                       "max"=1,
+                       "value"=0.5,
+                       "step"=0.01,
+                       "round"=FALSE,
+                       "ticks"=TRUE,
+                       "animate"=FALSE,
+                       "width"=NULL,
+                       "sep"=",",
+                       "pre"=NULL,
+                       "post"=NULL,
+                       "timeFormat"=NULL,
+                       "timezone"=NULL,
+                       "dragRange"=TRUE)
+  })
+  output$UIpts<- renderUI({
+    shiny::sliderInput("inputId"="pts",
+                       "label"=getText("Minimal neighbour "),
+                       "min"=2,
+                       "max"=10,
+                       "value"=5,
+                       "step"=1,
+                       "round"=FALSE,
+                       "ticks"=TRUE,
+                       "animate"=FALSE,
+                       "width"=NULL,
+                       "sep"=",",
+                       "pre"=NULL,
+                       "post"=NULL,
+                       "timeFormat"=NULL,
+                       "timezone"=NULL,
+                       "dragRange"=TRUE)
+  })
 }
 
 shinyApp(ui, server)

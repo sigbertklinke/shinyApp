@@ -25,18 +25,18 @@ CheckboxInput <- function (app, inputId, label, value = FALSE, width = NULL) {
   #
   uargs <- list(session=I('session'), inputId=fargs$inputId, label=fargs$label, value=I('sel'))
   app$input[[1+length(app$input)]] <- list(Type    = c('checkboxInput', 'uiOutput'),
-                                          Id      = c(inputId, ui),
-                                          Value   = template('if(param=="input${{ID}}") { v<-toLog(val); if(is.na(v)) return({{VAL}}) else return(val) }',
+                                           Id      = c(inputId, ui),
+                                           Value   = template('if(param=="input${{ID}}") { v<-toLog(val); if(is.na(v)) return({{VAL}}) else return(val) }',
                                                              ID=inputId, VAL=value),
-                                          Server  = template("output${{UI}} <- renderUI({\n{{FUN}}\n})", 
+                                           Server  = template("output${{UI}} <- renderUI({\n{{FUN}}\n})", 
                                                              UI=ui, FUN=str_call('checkboxInput', fargs, lib='shiny')),
-                                          Observer = template("observe({
+                                           Observer = template("observe({
                                                                {{LANGUAGE}}
                                                                sel<-value(isolate(input${{ID}}))
                                                                {{FUN}}
                                                               })", 
                                                               LANGUAGE='{{Language}}', ID=inputId, FUN=str_call('updateCheckboxInput', uargs, lib='shiny')),
-                                          Sidebar = str_call('uiOutput', list(outputId=ui))
+                                           Sidebar = str_call('uiOutput', list(outputId=ui))
   )
   app
 }

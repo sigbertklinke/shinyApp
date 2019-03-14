@@ -1,29 +1,24 @@
-# shinyExample
+# shinyApp
 
-```shinyExamples``` aims to run and show simple R-, Octave- and Stata programs which produce only console output or one plot.
+```shinyApp``` aims to create simple  [Shiny](shiny.rstudio.com) apps.
 
 ## Prerequisites
 
-Software that you need to install before using ```shinyExample```
+You need to install the package `shinyExample` beforehand
 
-* [Ghostscript](https://www.ghostscript.com/) 
-* [ImageMagick](https://www.imagemagick.org)
-
-After the installation restart R and RStudio.
-
-If you want to run Octave or Stata programs then you install them beforehand.
+```devtools::install_github('sigbertklinke/shinyExample')```
 
 ## Getting Started
 
 Within R install the package by
 
-```devtools::install_github('sigbertklinke/shinyExample')```
+```devtools::install_github('sigbertklinke/shinyApp')```
 
-Call
+Read the vignette
 
 ```
-library("shinyExample")
-runShinyExample()
+library("shinyApp")
+vignetts("shinyApp")
 ```
 
 ## Author(s)
