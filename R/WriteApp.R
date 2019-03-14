@@ -75,7 +75,8 @@ WriteApp <- function (app, file='app.R', edit='file.edit', copyright=NULL, ...) 
     #)
   } else {
     prg <- check_ID(prg, app$output[[1]]$Id, app$output[[1]]$Type)
-    app$DashboardBody[[1+length(app$DashboardBody)]] <- app$output[[1]]
+    app$DashboardBody[[1+length(app$DashboardBody)]] <- app$output[[1]]$Body
+    prg <- appendToPrg(prg, app$output[[1]])
   }
   if(length(app$input)) {
     for (i in seq(app$input)) {
