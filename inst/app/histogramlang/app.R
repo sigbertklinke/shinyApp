@@ -16,26 +16,34 @@ setSelection("var1", is.var1)
 
 
 ui <- dashboardPage(
-  dashboardHeader(title="", titleWidth=, disable=),
-  dashboardSidebar(collapsed=, width=, disable=,
+  dashboardHeader("title"="MM*Stat",
+                  "titleWidth"=NULL,
+                  "disable"=FALSE),
+  dashboardSidebar("disable"=FALSE,
+                   "width"=NULL,
+                   "collapsed"=FALSE,
+                   sidebarMenuOutput("UImmstatTabs"),
                    uiOutput("outputId"="UIbreaks"),
                    uiOutput("outputId"="UIrug"),
                    uiOutput("outputId"="UIdata"),
                    uiOutput("outputId"="UIvar1"),
                    uiOutput("outputId"="UIlang"),
+                   
                    shiny::tags$div(align="center",
                                    shiny::tags$hr(),
-                                   shiny::tags$a(href = 'https://github.com/sigbertklinke/shinyExample', 'Created with shinyExample'),
+                                   shiny::tags$a(href = "https://github.com/sigbertklinke/shinyApp", "Created with shinyApp"),
                                    shiny::tags$br(),
-                                   shiny::tags$a(target="_blank", href="https://www.wihoforschung.de/de/flipps-1327.php",  'Supported by BMBF')
-                   )
-  ),
-  dashboardBody(
-    shiny::plotOutput("outputId"="plot",
-                      "width"="100%",
-                      "height"="400px",
-                      "inline"=FALSE)
-  )
+                                   shiny::tags$a(target="_blank", href="https://www.wihoforschung.de/de/flipps-1327.php",  "Supported by BMBF"))),
+  dashboardBody(tabItems(tabItem("tabName"="mmstatItem1",
+                                 shiny::plotOutput("outputId"="Histogram",
+                                                   "width"="100%",
+                                                   "height"="400px",
+                                                   "inline"=FALSE)),
+                         tabItem("tabName"="mmstatItem2",
+                                 shiny::plotOutput("outputId"="Boxplot",
+                                                   "width"="100%",
+                                                   "height"="400px",
+                                                   "inline"=FALSE))))
 )
 
 server <- function(input, output, session) {
@@ -120,14 +128,31 @@ server <- function(input, output, session) {
                              "selected"=sel)
   })
   
-  output$plot <- shiny::renderPlot({
+  output$Histogram <- shiny::renderPlot({
     selectLanguage(value(input$lang))
-    #/home/sigbert/syncthing/projekte/R/shinyApp/inst/app/histogramlang/hist8.R
-    # shinyApp/inst/app/histogramlang/hist8.R
+    #C:\Users\sk\Desktop\syncthing\projekte\R\shinyApp\inst\app\histogramlang\hist9.R
+    # shinyApp/inst/app/histogram/hist9.R
     x <- getDataSelection(value(input$data), value(input$var1))
     b <- seq(min(x), max(x), length.out=value(input$breaks)+1)
     hist(x, breaks=b, main=getText(attr(x, "varnames")))
     if(value(input$rug)) rug(x)
+  })
+  output$Boxplot <- shiny::renderPlot({
+    selectLanguage(value(input$lang))
+    #C:\Users\sk\Desktop\syncthing\projekte\R\shinyApp\inst\app\histogramlang\box9.R
+    # shinyApp/inst/app/histogram/box9.R
+    x <- getDataSelection(value(input$data), value(input$var1))
+    boxplot(x, horizontal = TRUE, main=getText(attr(x, "varnames")))
+    if(value(input$rug)) rug(x)
+  })
+  output$UImmstatTabs <- renderMenu({
+    selectLanguage(value(input$lang))
+    
+    sidebarMenu("id"="mmstatTabs",
+                menuItem("text"=getText("Histogram"),
+                         "tabName"="mmstatItem1"),
+                menuItem("text"=getText("Boxplot"),
+                         "tabName"="mmstatItem2"))
   })
   output$UIbreaks<- renderUI({
     shiny::sliderInput("inputId"="breaks",
